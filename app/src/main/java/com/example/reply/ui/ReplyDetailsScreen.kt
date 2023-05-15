@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.reply.R
 import com.example.reply.data.Email
 import com.example.reply.data.MailboxType
@@ -54,6 +57,7 @@ fun ReplyDetailsScreen(
     replyUiState: ReplyUiState,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
+    isFullScreen: Boolean = false
 ) {
     BackHandler {
         onBackPressed()
@@ -67,16 +71,25 @@ fun ReplyDetailsScreen(
                 .padding(top = dimensionResource(R.dimen.detail_card_list_padding_top))
         ) {
             item {
-                ReplyDetailsScreenTopBar(
-                    onBackPressed,
-                    replyUiState,
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = dimensionResource(R.dimen.detail_topbar_padding_bottom))
-                )
+                if(isFullScreen) {
+                    ReplyDetailsScreenTopBar(
+                        onBackPressed,
+                        replyUiState,
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = dimensionResource(R.dimen.detail_topbar_padding_bottom))
+                    )
+                }
+
                 ReplyEmailDetailsCard(
                     email = replyUiState.currentSelectedEmail,
-                    mailboxType = replyUiState.currentMailbox
+                    mailboxType = replyUiState.currentMailbox,
+                    isFullScreen = isFullScreen,
+                    modifier =
+                        if(isFullScreen)
+                            Modifier.padding(horizontal = 16.dp)
+                        else
+                            Modifier.padding(end = 16.dp)
                 )
             }
         }
@@ -123,6 +136,7 @@ private fun ReplyDetailsScreenTopBar(
 private fun ReplyEmailDetailsCard(
     email: Email,
     mailboxType: MailboxType,
+    isFullScreen: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -142,20 +156,27 @@ private fun ReplyEmailDetailsCard(
                 email,
                 Modifier.fillMaxWidth()
             )
-            Text(
-                text = stringResource(email.subject),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(
-                    top = dimensionResource(R.dimen.detail_content_padding_top),
-                    bottom = dimensionResource(R.dimen.detail_expanded_subject_body_spacing)
-                ),
-            )
+            if(!isFullScreen) {
+                Text(
+                    text = stringResource(email.subject),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(
+                        top = dimensionResource(R.dimen.detail_content_padding_top),
+                        bottom = dimensionResource(R.dimen.detail_expanded_subject_body_spacing)
+                    ),
+                )
+
+            }else{
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
             Text(
                 text = stringResource(email.body),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
             DetailsScreenButtonBar(mailboxType, displayToast)
         }
     }
